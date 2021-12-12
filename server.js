@@ -1,4 +1,4 @@
-const io = require("socket.io")(5000, {
+const io = require("socket.io")(3030, {
   cors: {
     origin: "*",
   },
@@ -19,6 +19,7 @@ const getUser = (userId) => {
   return users.find((user) => Number(user.userId) === userId);
 };
 
+
 io.on("connection", (socket) => {
   console.log("connected");
   socket.emit("welcome", "This is socket server");
@@ -28,6 +29,24 @@ io.on("connection", (socket) => {
     addUser(userId, socket.id);
     io.emit("getUsers", users);
   });
+
+  //Notifi Send contact
+  socket.on("sendUser", ({ userReceive, userSend }) => {
+    // sendUser(userId, socket.id);
+    socket.broadcast.emit("send", {
+      userReceive,
+      userSend,
+    });
+  });
+  //Notifi accept contact
+  socket.on("acceptUser", ({ userReceive, userSend }) => {
+    // sendUser(userId, socket.id);
+    socket.broadcast.emit("accept", {
+      userReceive,
+      userSend,
+    });
+  });
+
 
   //send and get message
   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
