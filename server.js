@@ -1,8 +1,24 @@
-const io = require("socket.io")(3030, {
+const http = require("http");
+const express = require("express");
+const cors = require("cors");
+// const socketio = require("socket.io");
+// const io = require("socket.io")(3030, {
+//   cors: {
+//     origin: "*",
+//   },
+// });
+const router = require("./router");
+
+const app = express();
+const server = http.createServer(app);
+const io = require("socket.io")(server, {
   cors: {
     origin: "*",
   },
 });
+
+app.use(cors());
+app.use(router);
 
 let users = [];
 
@@ -18,7 +34,6 @@ const removeUser = (socketId) => {
 const getUser = (userId) => {
   return users.find((user) => Number(user.userId) === userId);
 };
-
 
 io.on("connection", (socket) => {
   console.log("connected");
@@ -47,7 +62,6 @@ io.on("connection", (socket) => {
     });
   });
 
-
   //send and get message
   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
     // if (receiverId.length > 0) {
@@ -74,3 +88,7 @@ io.on("connection", (socket) => {
     io.emit("getUsers", users);
   });
 });
+
+server.listen(process.env.PORT || 3030, () =>
+  console.log(`Server has started.`)
+);
